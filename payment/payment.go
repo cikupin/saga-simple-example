@@ -73,7 +73,7 @@ func paymentSucess(w http.ResponseWriter, r *http.Request) {
 	var payload paymentRequest
 	json.NewDecoder(r.Body).Decode(&payload)
 
-	log.Printf("$%d payment for order_id %d with payment method %s : success\n", payload.Amount, payload.OrderID, payload.PaymentMethod)
+	log.Printf("[payment ID 10] $%d payment for order_id %d with payment method %s : success\n", payload.Amount, payload.OrderID, payload.PaymentMethod)
 
 	resp := paymentResponse{
 		PaymentID: 10,

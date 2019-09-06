@@ -11,9 +11,9 @@ import (
 
 func main() {
 	app := cli.NewApp()
-	app.Name = "Saga PAttern"
+	app.Name = "Saga Pattern"
 	app.Usage = "A simple saga pattern example in go"
-	app.UsageText = "[global options] command [command options] [arguments...]"
+	app.UsageText = "go run main.go [command]"
 	app.Version = "1.0.0"
 
 	app.Commands = []cli.Command{

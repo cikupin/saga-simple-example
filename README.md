@@ -9,7 +9,7 @@ A simple saga pattern example using Go and [https://github.com/lysu/go-saga](htt
 ## Command
 
 ```bash
-$ go run main.go core    # run saga orceshestrator (port 8000)
+$ go run main.go core    # run saga orchestrator (port 8000)
 $ go run main.go item    # run item service (port 8001)
 $ go run main.go order   # run order service (port 8002)
 $ go run main.go payment # run payment service (port 8003)

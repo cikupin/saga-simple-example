@@ -10,6 +10,25 @@
   version = "v1.7.3"
 
 [[projects]]
+  branch = "master"
+  digest = "1:217055446c25288d7802cd09c208724ea8d5f6a09057c5a5dbce5006dac25e43"
+  name = "github.com/juju/errors"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "0232dcc7464d0c0037b619d6e10190301d01362f"
+
+[[projects]]
+  branch = "master"
+  digest = "1:29291c97bb48ed5f6ab3a60175620063a925ba60a6b212e7573c35dd0cec401e"
+  name = "github.com/lysu/go-saga"
+  packages = [
+    ".",
+    "storage",
+  ]
+  pruneopts = "UT"
+  revision = "a5372c967a5bb63fd91b894a6ede989d0dd0cba5"
+
+[[projects]]
   digest = "1:ca4df663ad76879ad38dbd736493679cbb1aa596c6d479fd9fc5e959e5ceb4fb"
   name = "github.com/urfave/cli"
   packages = ["."]
@@ -17,11 +36,20 @@
   revision = "e6cf83ec39f6e1158ced1927d4ed14578fda8edb"
   version = "v1.21.0"
 
+[[projects]]
+  branch = "master"
+  digest = "1:76ee51c3f468493aff39dbacc401e8831fbb765104cbf613b89bef01cf4bad70"
+  name = "golang.org/x/net"
+  packages = ["context"]
+  pruneopts = "UT"
+  revision = "24e19bdeb0f2d062d8e2640d50a7aaf2a7f80e7a"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
     "github.com/gorilla/mux",
+    "github.com/lysu/go-saga",
     "github.com/urfave/cli",
   ]
   solver-name = "gps-cdcl"

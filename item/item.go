@@ -27,7 +27,6 @@ type (
 	// Response defines purchase item response
 	Response struct {
 		PuchaseItemID int  `json:"purchase_item_id,omitempty"`
-		ItemPrice     int  `json:"item_price,omitempty"`
 		Success       bool `json:"success"`
 	}
 )
@@ -82,7 +81,6 @@ func purchaseItemSuceess(w http.ResponseWriter, r *http.Request) {
 
 	resp := Response{
 		PuchaseItemID: 66,
-		ItemPrice:     50000,
 		Success:       true,
 	}
 

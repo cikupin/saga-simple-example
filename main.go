@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"github.com/cikupin/saga-simple-example/item"
+	"github.com/cikupin/saga-simple-example/orchestrator"
 	"github.com/cikupin/saga-simple-example/order"
 	"github.com/cikupin/saga-simple-example/payment"
 	"github.com/urfave/cli"
@@ -18,6 +19,7 @@ func main() {
 	app.Version = "1.0.0"
 
 	app.Commands = []cli.Command{
+		orchestrator.Serve,
 		item.Serve,
 		order.Serve,
 		payment.Serve,

@@ -14,16 +14,19 @@ import (
 )
 
 type (
-	orderRequest struct {
-		Item   string `json:"item"`
-		Amount int    `json:"amount"`
+	// Request defines order request
+	Request struct {
+		Item  string `json:"item"`
+		Price int    `json:"price"`
 	}
 
-	orderCompensationRequest struct {
+	// CompensationRequest defines order compensation request
+	CompensationRequest struct {
 		OrderID int `json:"order_id"`
 	}
 
-	orderResponse struct {
+	// Response defines order response
+	Response struct {
 		OrderID int  `json:"order_id,omitempty"`
 		Success bool `json:"success"`
 	}
@@ -74,12 +77,12 @@ func startOrderService(c *cli.Context) {
 
 // orderSuccess defines order success logic
 func orderSuccess(w http.ResponseWriter, r *http.Request) {
-	var payload orderRequest
+	var payload Request
 	json.NewDecoder(r.Body).Decode(&payload)
 
-	log.Printf("[order ID 32] purchase item %s for amount $%d : success\n", payload.Item, payload.Amount)
+	log.Printf("[order ID 32] purchase item %s for price $%d : success\n", payload.Item, payload.Price)
 
-	resp := orderResponse{
+	resp := Response{
 		OrderID: 32,
 		Success: true,
 	}
@@ -91,12 +94,12 @@ func orderSuccess(w http.ResponseWriter, r *http.Request) {
 
 // orderFailed defines order failed logic
 func orderFailed(w http.ResponseWriter, r *http.Request) {
-	var payload orderRequest
+	var payload Request
 	json.NewDecoder(r.Body).Decode(&payload)
 
-	log.Printf("purchase item %s for amount $%d : FAILED!!!\n", payload.Item, payload.Amount)
+	log.Printf("purchase item %s for price $%d : FAILED!!!\n", payload.Item, payload.Price)
 
-	resp := orderResponse{
+	resp := Response{
 		Success: false,
 	}
 
@@ -107,12 +110,12 @@ func orderFailed(w http.ResponseWriter, r *http.Request) {
 
 // orderCompensation defines order compensation logic
 func orderCompensation(w http.ResponseWriter, r *http.Request) {
-	var payload orderCompensationRequest
+	var payload CompensationRequest
 	json.NewDecoder(r.Body).Decode(&payload)
 
 	log.Printf("[rollback] rollback order_id %d : success\n", payload.OrderID)
 
-	resp := orderResponse{
+	resp := Response{
 		Success: true,
 	}
 

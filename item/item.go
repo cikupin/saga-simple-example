@@ -14,16 +14,20 @@ import (
 )
 
 type (
-	purchaseItemRequest struct {
+	// Request defines item request
+	Request struct {
 		Item string `json:"item"`
 	}
 
-	purchaseItemCompensationRequest struct {
+	// CompensationRequest defines item compensation request
+	CompensationRequest struct {
 		PurchaseItemID int `json:"purchase_item_id"`
 	}
 
-	purchaseItemResponse struct {
+	// Response defines purchase item response
+	Response struct {
 		PuchaseItemID int  `json:"purchase_item_id,omitempty"`
+		ItemPrice     int  `json:"item_price,omitempty"`
 		Success       bool `json:"success"`
 	}
 )
@@ -71,13 +75,14 @@ func startPurchaseItemService(c *cli.Context) {
 }
 
 func purchaseItemSuceess(w http.ResponseWriter, r *http.Request) {
-	var payload purchaseItemRequest
+	var payload Request
 	json.NewDecoder(r.Body).Decode(&payload)
 
 	log.Printf("[purchase item ID 66] purchase item %s : success\n", payload.Item)
 
-	resp := purchaseItemResponse{
+	resp := Response{
 		PuchaseItemID: 66,
+		ItemPrice:     50000,
 		Success:       true,
 	}
 
@@ -87,12 +92,12 @@ func purchaseItemSuceess(w http.ResponseWriter, r *http.Request) {
 }
 
 func purchaseItemFailed(w http.ResponseWriter, r *http.Request) {
-	var payload purchaseItemRequest
+	var payload Request
 	json.NewDecoder(r.Body).Decode(&payload)
 
 	log.Printf("purchase item %s : FAILED!!!\n", payload.Item)
 
-	resp := purchaseItemResponse{
+	resp := Response{
 		Success: false,
 	}
 
@@ -102,12 +107,12 @@ func purchaseItemFailed(w http.ResponseWriter, r *http.Request) {
 }
 
 func purchaseItemCompensated(w http.ResponseWriter, r *http.Request) {
-	var payload purchaseItemCompensationRequest
+	var payload CompensationRequest
 	json.NewDecoder(r.Body).Decode(&payload)
 
 	log.Printf("[rollback] rollback purchase_item_id %d : success\n", payload.PurchaseItemID)
 
-	resp := purchaseItemResponse{
+	resp := Response{
 		Success: true,
 	}
 

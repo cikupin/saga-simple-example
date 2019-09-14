@@ -14,13 +14,15 @@ import (
 )
 
 type (
-	paymentRequest struct {
+	// Request defines payment request
+	Request struct {
 		PaymentMethod string `json:"payment_method"`
-		Amount        int    `json:"amount"`
+		Price         int    `json:"price"`
 		OrderID       int    `json:"order_id"`
 	}
 
-	paymentResponse struct {
+	// Response defines payment response
+	Response struct {
 		PaymentID int  `json:"payment_id,omitempty"`
 		Success   bool `json:"success"`
 	}
@@ -70,12 +72,12 @@ func startPaymentService(c *cli.Context) {
 
 // paymentSucess defines payment success logic
 func paymentSucess(w http.ResponseWriter, r *http.Request) {
-	var payload paymentRequest
+	var payload Request
 	json.NewDecoder(r.Body).Decode(&payload)
 
-	log.Printf("[payment ID 10] $%d payment for order_id %d with payment method %s : success\n", payload.Amount, payload.OrderID, payload.PaymentMethod)
+	log.Printf("[payment ID 10] $%d payment for order_id %d with payment method %s : success\n", payload.Price, payload.OrderID, payload.PaymentMethod)
 
-	resp := paymentResponse{
+	resp := Response{
 		PaymentID: 10,
 		Success:   true,
 	}
@@ -87,12 +89,12 @@ func paymentSucess(w http.ResponseWriter, r *http.Request) {
 
 // defines payment failed logic
 func paymentFailed(w http.ResponseWriter, r *http.Request) {
-	var payload paymentRequest
+	var payload Request
 	json.NewDecoder(r.Body).Decode(&payload)
 
-	log.Printf("$%d payment for order_id %d with payment method %s : FAILED!!!\n", payload.Amount, payload.OrderID, payload.PaymentMethod)
+	log.Printf("$%d payment for order_id %d with payment method %s : FAILED!!!\n", payload.Price, payload.OrderID, payload.PaymentMethod)
 
-	resp := paymentResponse{
+	resp := Response{
 		Success: false,
 	}
 

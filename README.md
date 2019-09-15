@@ -1,6 +1,6 @@
 # Saga Pattern Example
 
-A simple saga pattern example using Go and [https://github.com/lysu/go-saga](https://github.com/lysu/go-saga) library.
+A simple saga pattern example using Go and [https://github.com/cikupin/go-saga](https://github.com/cikupin/go-saga) library.
 
 ## Requirement
 

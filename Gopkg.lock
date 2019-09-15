@@ -18,8 +18,7 @@
   version = "v1.23.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:1a807063a39a7a6d4feae97c436d3a26b70c4ce4030be40578af5229486af20a"
+  digest = "1:7f1006dd2472228a84c2ab926650af87f5f7c23a39a0db7389991c8becbc4b48"
   name = "github.com/cikupin/go-saga"
   packages = [
     ".",
@@ -28,6 +27,7 @@
   ]
   pruneopts = "UT"
   revision = "7d64c8b99cd62ae9dfac690f17d5b85b61bb7883"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"

@@ -10,9 +10,9 @@ import (
 	"sync"
 	"time"
 
+	saga "github.com/cikupin/go-saga"
+	_ "github.com/cikupin/go-saga/storage/kafka" // use kafka as saga log storage engine
 	"github.com/gorilla/mux"
-	saga "github.com/lysu/go-saga"
-	_ "github.com/lysu/go-saga/storage/kafka" // use kafka as saga log storage engine
 	"github.com/urfave/cli"
 )
 

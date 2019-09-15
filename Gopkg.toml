@@ -12,4 +12,4 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/lysu/go-saga"
+  name = "github.com/cikupin/go-saga"

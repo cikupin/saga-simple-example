@@ -7,10 +7,12 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/lysu/go-saga"
+	saga "github.com/lysu/go-saga"
+	_ "github.com/lysu/go-saga/storage/kafka" // use kafka as saga log storage engine
 	"github.com/urfave/cli"
 )
 
@@ -26,17 +28,16 @@ type (
 	}
 )
 
-// Serve will serve saga orchestrator
-var Serve = cli.Command{
-	Name:        "main",
-	Usage:       "Run saga orchestrator",
-	Description: "Execute this command to start saga orchestrator",
-	Action:      startOrchestrator,
-}
-
 var (
-	contextKeyPurchaseItemID = "purchase-item-id"
-	contextKeyOrderID        = "order-id"
+	// Serve will serve saga orchestrator
+	Serve = cli.Command{
+		Name:        "main",
+		Usage:       "Run saga orchestrator",
+		Description: "Execute this command to start saga orchestrator",
+		Action:      startOrchestrator,
+	}
+
+	sagaOnce sync.Once
 )
 
 const (
@@ -46,8 +47,19 @@ const (
 	labelPayment      = "payment"
 )
 
-func init() {
+type orderProperty struct {
+	PurchaseItemID int
+	OrderID        int
+}
 
+func init() {
+	sagaOnce.Do(func() {
+		saga.StorageConfig.Kafka.ZkAddrs = []string{"0.0.0.0:2181"}
+		saga.StorageConfig.Kafka.BrokerAddrs = []string{"0.0.0.0:9092"}
+		saga.StorageConfig.Kafka.Partitions = 1
+		saga.StorageConfig.Kafka.Replicas = 1
+		saga.StorageConfig.Kafka.ReturnDuration = 50 * time.Millisecond
+	})
 }
 
 func startOrchestrator(c *cli.Context) {
@@ -101,21 +113,16 @@ func handlerNormalFlow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	saga.StorageConfig.Kafka.ZkAddrs = []string{"0.0.0.0:2181"}
-	saga.StorageConfig.Kafka.BrokerAddrs = []string{"0.0.0.0:9092"}
-	saga.StorageConfig.Kafka.Partitions = 1
-	saga.StorageConfig.Kafka.Replicas = 1
-	saga.StorageConfig.Kafka.ReturnDuration = 50 * time.Millisecond
-
-	saga.AddSubTxDef(labelPurchaseItem, purchaseItemSuccess, purchaseItemCompensation).
-		AddSubTxDef(labelOrder, orderSuccess, orderCompensation).
-		AddSubTxDef(labelPayment, paymentSuccess, paymentFailed)
+	saga.AddSubTxDef(labelPurchaseItem, purchaseItemSuccess, compensatePurchaseItem).
+		AddSubTxDef(labelOrder, orderSuccess, compensateOrder).
+		AddSubTxDef(labelPayment, paymentSuccess, compensatePayment)
 
 	ctx := context.Background()
+	property := &orderProperty{}
 	saga.StartSaga(ctx, sagaTopicID).
-		ExecSub(labelPurchaseItem, input.Item).
-		ExecSub(labelOrder, input.Item, input.Price).
-		ExecSub(labelPayment, input.PaymentMethod, input.Price, ctx.Value(contextKeyOrderID).(int)).
+		ExecSub(labelPurchaseItem, property, input.Item).
+		ExecSub(labelOrder, property, input.Item, input.Price).
+		ExecSub(labelPayment, property, input.PaymentMethod, input.Price).
 		EndSaga()
 	return
 }
@@ -128,15 +135,17 @@ func handlerPurchaseItemFailed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	saga.AddSubTxDef(labelPurchaseItem, purchaseItemFailed, purchaseItemCompensation).
-		AddSubTxDef(labelOrder, orderSuccess, orderCompensation).
-		AddSubTxDef(labelPayment, paymentSuccess, paymentFailed)
+	saga.AddSubTxDef(labelPurchaseItem, purchaseItemFailed, compensatePurchaseItem).
+		AddSubTxDef(labelOrder, orderSuccess, compensateOrder).
+		AddSubTxDef(labelPayment, paymentSuccess, compensatePayment)
 
 	ctx := context.Background()
+	property := &orderProperty{}
 	saga.StartSaga(ctx, sagaTopicID).
-		ExecSub(labelPurchaseItem, input.Item).
-		ExecSub(labelOrder, input.Item, input.Price).
-		ExecSub(labelPayment, input.PaymentMethod, input.Price, ctx.Value(contextKeyOrderID).(int))
+		ExecSub(labelPurchaseItem, property, input.Item).
+		ExecSub(labelOrder, property, input.Item, input.Price).
+		ExecSub(labelPayment, property, input.PaymentMethod, input.Price).
+		EndSaga()
 	return
 }
 
@@ -148,15 +157,17 @@ func handlerOrderFailed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	saga.AddSubTxDef(labelPurchaseItem, purchaseItemSuccess, purchaseItemCompensation).
-		AddSubTxDef(labelOrder, orderFailed, orderCompensation).
-		AddSubTxDef(labelPayment, paymentSuccess, paymentFailed)
+	saga.AddSubTxDef(labelPurchaseItem, purchaseItemSuccess, compensatePurchaseItem).
+		AddSubTxDef(labelOrder, orderFailed, compensateOrder).
+		AddSubTxDef(labelPayment, paymentSuccess, compensatePayment)
 
 	ctx := context.Background()
+	property := &orderProperty{}
 	saga.StartSaga(ctx, sagaTopicID).
-		ExecSub(labelPurchaseItem, input.Item).
-		ExecSub(labelOrder, input.Item, input.Price).
-		ExecSub(labelPayment, input.PaymentMethod, input.Price, ctx.Value(contextKeyOrderID).(int))
+		ExecSub(labelPurchaseItem, property, input.Item).
+		ExecSub(labelOrder, property, input.Item, input.Price).
+		ExecSub(labelPayment, property, input.PaymentMethod, input.Price).
+		EndSaga()
 	return
 }
 
@@ -168,14 +179,16 @@ func handlerPaymentFailed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	saga.AddSubTxDef(labelPurchaseItem, purchaseItemSuccess, purchaseItemCompensation).
-		AddSubTxDef(labelOrder, orderSuccess, orderCompensation).
-		AddSubTxDef(labelPayment, paymentFailed, paymentFailed)
+	saga.AddSubTxDef(labelPurchaseItem, purchaseItemSuccess, compensatePurchaseItem).
+		AddSubTxDef(labelOrder, orderSuccess, compensateOrder).
+		AddSubTxDef(labelPayment, paymentFailed, compensatePayment)
 
 	ctx := context.Background()
+	property := &orderProperty{}
 	saga.StartSaga(ctx, sagaTopicID).
-		ExecSub(labelPurchaseItem, input.Item).
-		ExecSub(labelOrder, input.Item, input.Price).
-		ExecSub(labelPayment, input.PaymentMethod, input.Price, ctx.Value(contextKeyOrderID).(int))
+		ExecSub(labelPurchaseItem, property, input.Item).
+		ExecSub(labelOrder, property, input.Item, input.Price).
+		ExecSub(labelPayment, property, input.PaymentMethod, input.Price).
+		EndSaga()
 	return
 }

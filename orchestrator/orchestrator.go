@@ -119,11 +119,13 @@ func handlerNormalFlow(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 	property := &orderProperty{}
-	saga.StartSaga(ctx, sagaTopicID).
+	sagaInstance := saga.StartSaga(ctx, sagaTopicID).
 		ExecSub(labelPurchaseItem, property, input.Item).
 		ExecSub(labelOrder, property, input.Item, input.Price).
 		ExecSub(labelPayment, property, input.PaymentMethod, input.Price).
 		EndSaga()
+
+	generateResponse(w, sagaInstance.IsAborted())
 	return
 }
 
@@ -141,11 +143,13 @@ func handlerPurchaseItemFailed(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 	property := &orderProperty{}
-	saga.StartSaga(ctx, sagaTopicID).
+	sagaInstance := saga.StartSaga(ctx, sagaTopicID).
 		ExecSub(labelPurchaseItem, property, input.Item).
 		ExecSub(labelOrder, property, input.Item, input.Price).
 		ExecSub(labelPayment, property, input.PaymentMethod, input.Price).
 		EndSaga()
+
+	generateResponse(w, sagaInstance.IsAborted())
 	return
 }
 
@@ -163,11 +167,13 @@ func handlerOrderFailed(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 	property := &orderProperty{}
-	saga.StartSaga(ctx, sagaTopicID).
+	sagaInstance := saga.StartSaga(ctx, sagaTopicID).
 		ExecSub(labelPurchaseItem, property, input.Item).
 		ExecSub(labelOrder, property, input.Item, input.Price).
 		ExecSub(labelPayment, property, input.PaymentMethod, input.Price).
 		EndSaga()
+
+	generateResponse(w, sagaInstance.IsAborted())
 	return
 }
 
@@ -185,10 +191,20 @@ func handlerPaymentFailed(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 	property := &orderProperty{}
-	saga.StartSaga(ctx, sagaTopicID).
+	sagaInstance := saga.StartSaga(ctx, sagaTopicID).
 		ExecSub(labelPurchaseItem, property, input.Item).
 		ExecSub(labelOrder, property, input.Item, input.Price).
 		ExecSub(labelPayment, property, input.PaymentMethod, input.Price).
 		EndSaga()
+
+	generateResponse(w, sagaInstance.IsAborted())
 	return
+}
+
+func generateResponse(w http.ResponseWriter, isAborted bool) {
+	response := buyItemResponse{Success: !isAborted}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }

@@ -27,7 +27,7 @@
     "storage/kafka",
   ]
   pruneopts = "UT"
-  revision = "40b3691d33a61dfb927440e980316f7dd3d7a47f"
+  revision = "7d64c8b99cd62ae9dfac690f17d5b85b61bb7883"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
